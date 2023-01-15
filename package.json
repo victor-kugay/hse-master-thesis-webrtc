@@ -1,0 +1,107 @@
+{
+  "name": "hse-master-thesis-webrtc",
+  "version": "1.0.0",
+  "description": "WebRTC application for Master Thesis",
+  "author": "https://github.com/victor-kugay",
+  "keywords": [
+    "webrtc",
+    "express",
+    "websocket",
+    "react"
+  ],
+  "homepage": "https://github.com/victor-kugay/hse-master-thesis-webrtc#readme",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victor-kugay/hse-master-thesis-webrtc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/victor-kugay/hse-master-thesis-webrtc/issues"
+  },
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js}\"",
+    "lint": "eslint 'src/**/*.{ts,tsx,js}'",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "typecheck": "tsc --noEmit",
+    "copy:envs": "cp .env.example .env"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{md,json}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "@nestjs/common": "9.2.1",
+    "@nestjs/config": "2.2.0",
+    "@nestjs/core": "9.2.1",
+    "@nestjs/platform-express": "9.2.1",
+    "@nestjs/platform-socket.io": "^9.2.1",
+    "@nestjs/serve-static": "3.0.0",
+    "@nestjs/swagger": "6.1.4",
+    "@nestjs/websockets": "^9.2.1",
+    "@socket.io/redis-adapter": "8.0.1",
+    "class-transformer": "0.5.1",
+    "class-validator": "0.14.0",
+    "helmet": "6.0.1",
+    "nestjs-pino": "3.1.2",
+    "pino-http": "8.3.1",
+    "pino-pretty": "9.1.1",
+    "redis": "4.5.1",
+    "reflect-metadata": "0.1.13",
+    "rimraf": "4.0.4",
+    "rxjs": "7.8.0",
+    "vue": "3.2.41"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "9.1.8",
+    "@nestjs/schematics": "9.0.4",
+    "@nestjs/testing": "9.2.1",
+    "@types/express": "4.17.15",
+    "@types/jest": "29.2.5",
+    "@types/node": "18.11.18",
+    "@types/supertest": "2.0.12",
+    "@typescript-eslint/eslint-plugin": "5.48.1",
+    "@typescript-eslint/parser": "5.48.1",
+    "eslint": "8.31.0",
+    "eslint-config-prettier": "8.6.0",
+    "eslint-plugin-import": "2.27.4",
+    "eslint-plugin-prettier": "4.2.1",
+    "jest": "29.3.1",
+    "lint-staged": "13.1.0",
+    "prettier": "2.8.3",
+    "supertest": "6.3.3",
+    "ts-jest": "29.0.5",
+    "ts-loader": "9.4.2",
+    "ts-node": "10.9.1",
+    "tsconfig-paths": "4.1.2",
+    "typescript": "4.9.4",
+    "yarnhook": "0.6.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "transform": {
+      ".+\\.(t|j)s$": "ts-jest"
+    },
+    "setupFiles": [
+      "dotenv/config"
+    ],
+    "testEnvironment": "node"
+  }
+}
