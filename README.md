@@ -314,7 +314,7 @@ signalingSocket.on("addPeer", (config) => {
 const peerConnection = new RTCPeerConnection({iceServers: ICE_SERVERS});
 ```
 
-6. В обработчике -> Добавить обработчик получения ICE кандидатов
+8. В обработчике -> Добавить обработчик получения ICE кандидатов
 
 ```js
 peerConnection.onicecandidate = function (event) {
@@ -335,9 +335,9 @@ peerConnection.onicecandidate = function (event) {
 
 ```js
 peerConnection.onaddstream = (event) => {
-	const videoElement = getVideoElement(peer_id);
-	peerMediaElements[peer_id] = remoteMedia;
-	videoElement.srcObject = stream;
+  const videoElement = getVideoElement(peer_id);
+  peerMediaElements[peer_id] = remoteMedia;
+  videoElement.srcObject = stream;
 });
 ```
 
