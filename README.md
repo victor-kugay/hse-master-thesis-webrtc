@@ -40,10 +40,71 @@ $ yarn copy:envs
 $ yarn start:dev
 ```
 
-## Диаграмма классов
+## Диаграммы
 
 <details>
-  <summary>Диаграмма классов</summary>
+  <summary><strong>Диаграмма алгоритмов</strong></summary>
+
+```uml
+@startuml
+
+skinparam maxMessageSize 200
+
+participant ClientA
+participant ClientB
+participant SignalingServer
+participant STUN
+
+ClientA -> ClientA : Запросить стрим с медиа данными\n**navigator.getUserMedia**
+ClientA -> ClientA : Перенаправить стрим в <video /> элемент\n**video.srcObject = stream**
+ClientA -> SignalingServer : Запросить список участников беседы\n**socket.emit(join, ...)
+SignalingServer -> SignalingServer : Добавить нового участника беседы
+SignalingServer -> ClientB : Уведомить о новом участнике беседы\n**socket.emit(addPeer, ...)
+ClientB -> ClientB : Создать новый инстанс RTCPeerConection
+ClientB -> ClientB : Добавить RTCPeerConection к списку участников беседы
+ClientB -> ClientB : Добавить локальный стрим в RTCPeerConection\n**connection.addSream()
+ClientB -> ClientB : Добавить вывод полученного стрим в <video />\n**connection.onaddstream
+ClientB -> ClientB : Добавить сериализацию данных из чата\n**connection.ondatachannel,event.channel.onmessage**
+SignalingServer -> ClientA : Отправить список участников беседы
+ClientA -> ClientA : Создать офер и описание сессии\n**connection.createOffer()
+ClientA -> ClientA : Добавить локальное описание сессии\n**connection.setLocalDescription
+ClientA -> ClientA : Добавить локальный стрим в RTCPeerConection\n**connection.addSream()
+ClientA -> ClientA : Добавить вывод полученного стрим в <video />\n**connection.onaddstream
+ClientA -> ClientA : Добавить сериализацию данных из чата\n**connection.ondatachannel,event.channel.onmessage**
+ClientA -> SignalingServer : Отправить описание сессии участникам беседы\n**socket.emit(relaySessionDescription, ...)
+SignalingServer -> ClientB : Уведомить о новом описании сессии\n**socket.emit(sessionDescription)
+ClientB -> ClientB : Создать новый инстанc RTCSessionDescription
+ClientB -> ClientB : Добавить описание сессии в список удаленных сессий\n**peer.setRemoteDescription**
+ClientB -> ClientB : Создать ответ\n**peer.createAnswer**
+ClientB -> ClientB : Добавить локальное описание из createAnswer\n**peer.setLocalDescription**
+ClientB -> SignalingServer : Отправить описание сессии участникам беседы\n**socket.emit(relaySessionDescription)
+SignalingServer -> ClientA : Уведомить об ответе\n**socket.emit(sessionDescription)
+ClientA -> ClientA : Создать новый инстанc RTCSessionDescription
+ClientA -> ClientA : Добавить описание сессии в список удаленных сессий\n**peer.setRemoteDescription**
+ClientA -> STUN : Запросить ICE кандидатов
+STUN --> ClientA : Отдать список ICE кандидатов
+ClientA -> SignalingServer : Уведомить сигнальный сервер о новом ICE кандидате\n**socket.emit(relayICECandidate)
+SignalingServer -> ClientB : Уведомить клиента о новом ICE кандидате
+ClientB -> ClientB : Добавить ICE кандидата к подключению\n**peer.addIceCandidate()
+
+ClientB -> STUN : Запросить ICE кандидатов
+STUN --> ClientB : Отдать список ICE кандидатов
+ClientB -> SignalingServer : Уведомить сигнальный сервер о новом ICE кандидате\n**socket.emit(relayICECandidate)
+SignalingServer -> ClientA : Уведомить клиента о новом ICE кандидате
+ClientA -> ClientA : Добавить ICE кандидата к подключению\n**peer.addIceCandidate()
+
+@enduml
+```
+</details>
+
+<br />
+
+<img src="diagrams/algorithm.svg" />
+
+<br />
+
+<details>
+  <summary><strong>Диаграмма классов</strong></summary>
 
 ```uml
 @startuml
@@ -56,7 +117,7 @@ package Client {
     +handleSessionDescriptionEvent()
     +handleIceCandidateEvent()
     +handleRemovePeerEvent()
-    - - -
+    ---
     +attachMediaStream()
     +setupLocalMedia()
     +resizeVideos()
@@ -166,11 +227,157 @@ package Infrastructure {
 diamond Websocket
 
 
-SignalingModule o- - LoggerModule
-SignalingModule o- - WebsocketModule
-WebsocketModule o- - ConfigModule
-App - - Websocket : Websocket
-Websocket - - SignalingModule : Websocket
+SignalingModule o-- LoggerModule
+SignalingModule o-- WebsocketModule
+WebsocketModule o-- ConfigModule
+App -- Websocket : Websocket
+Websocket -- SignalingModule : Websocket
 @enduml
 ```
 </details>
+
+<br />
+
+<img src="diagrams/class.svg" />
+
+## Алгоритм установки соединения с помощью протокола WebRTC
+
+1. Запросить доступ к Media девайсам пользователя
+
+```js
+navigator.mediaDevices.getUserMedia({audio: true, video: true});
+```
+
+2. Направить собственный Media Stream в video элемент
+
+```js
+const stream = ...
+const videoElement = document.getElementById('video');
+videoElement.srcObject = stream;
+```
+
+3. Добавить обработчик RTCSessionDescription
+
+```js
+signalingSocket.on("sessionDescription", function (config) {
+	const peer_id = config.peer_id;
+  // RTCPeerConnection других участников беседы
+	const peer = peers[peer_id];
+	const remoteDescription = config.session_description;
+	const description = new RTCSessionDescription(remoteDescription);
+	peer.setRemoteDescription(
+		description,
+		() => {
+			if (remoteDescription.type == "offer") {
+				peer.createAnswer(
+					(localDescription) => {
+						peer.setLocalDescription(
+							localDescription,
+							() => {
+                // уведомить остальных членов беседы о полученном описании сессиии
+								signalingSocket.emit("relaySessionDescription", {
+									peer_id: peer_id,
+									session_description: localDescription,
+								});
+							},
+						);
+					}
+				);
+			}
+		}
+	);
+});
+```
+
+4. Добавить обработчик RTCIceCandidate
+
+```js
+signalingSocket.on("iceCandidate", function (config) {
+	const peer = peers[config.peer_id];
+	const iceCandidate = config.ice_candidate;
+	peer.addIceCandidate(new RTCIceCandidate(iceCandidate));
+});
+```
+
+5. Запросить подключение к каналу у сигнального сервера
+
+```js
+signalingSocket.emit("join", {channel, userData});
+```
+
+6. Добавить обработчик получения списка участников беседы
+
+```js
+signalingSocket.on("addPeer", (config) => {
+  ...
+});
+```
+
+7. В обработчике -> Создать экземпляр RTCPeerConnection подключения
+
+```js
+const peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+```
+
+6. В обработчике -> Добавить обработчик получения ICE кандидатов
+
+```js
+peerConnection.onicecandidate = function (event) {
+	if (event.candidate) {
+    // информируем других членов беседы о новом ICE кандидате
+		signalingSocket.emit("relayICECandidate", {
+			peer_id: peer_id,
+			ice_candidate: {
+				sdpMLineIndex: event.candidate.sdpMLineIndex,
+				candidate: event.candidate.candidate,
+			},
+		});
+	}
+};
+```
+
+9. Добавить обработчик получения Media Stream
+
+```js
+peerConnection.onaddstream = (event) => {
+	const videoElement = getVideoElement(peer_id);
+	peerMediaElements[peer_id] = remoteMedia;
+	videoElement.srcObject = stream;
+});
+```
+
+10. Добавить обработчик получения сообщения в чате
+
+```js
+peerConnection.ondatachannel = function (event) {
+	event.channel.onmessage = (msg) => {
+    // обработать полученное сообщение
+	};
+};
+```
+
+11. Добавить собственный Media Stream в подключение
+
+```js
+peerConnection.addStream(localMediaStream);
+```
+
+12.  Создать офер и запросить подключение к пользователям в канале
+
+```js
+peerConnection.onnegotiationneeded = () => {
+	peerConnection
+		.createOffer()
+		.then((localDescription) => {
+			peerConnection
+				.setLocalDescription(localDescription)
+				.then(() => {
+          // Отправить описание сессию остальным членам беседы
+					signalingSocket.emit("relaySessionDescription", {
+						peer_id: peer_id,
+						session_description: localDescription,
+					});
+				});
+		});
+};
+```

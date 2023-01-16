@@ -1,0 +1,12 @@
+version: '3'
+services:
+  hse_master_thesis_webrtc:
+    restart: always
+    image: 'cr.yandex/crpsv0825qvlupmk3r3f/hse_master_thesis_webrtc:latest'
+    container_name: hse_master_thesis_webrtc
+    environment:
+      APP_API_PORT: 3000
+      APP_API_PREFIX: api
+      APP_API_SWAGGER: docs
+    ports:
+      - 3000:3000

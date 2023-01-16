@@ -1,6 +1,6 @@
 import {WebsocketGateway} from '@/modules/websocket/websocket.gateway';
 import {Injectable, OnModuleInit} from '@nestjs/common';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import {InjectPinoLogger, PinoLogger} from 'nestjs-pino';
 
 const channels: any = {};
 const sockets: any = {};
@@ -11,7 +11,7 @@ export class SignalingGateway implements OnModuleInit {
   constructor(
     private readonly websocketGateway: WebsocketGateway,
     @InjectPinoLogger(SignalingGateway.name)
-    private readonly logger: PinoLogger
+    private readonly logger: PinoLogger,
   ) {}
 
   public onModuleInit() {
@@ -35,8 +35,8 @@ export class SignalingGateway implements OnModuleInit {
 
     socket.on('join', (config: any) => {
       this.logger.info({
-        message: '[' + socket.id + '] join ', 
-        payload: config
+        message: '[' + socket.id + '] join ',
+        payload: config,
       });
       const channel = socketHostName + config.channel;
 
@@ -57,7 +57,7 @@ export class SignalingGateway implements OnModuleInit {
 
       this.logger.info({
         message: '[' + socket.id + '] join - connected peers grouped by channel',
-        payload: peers
+        payload: peers,
       });
 
       for (const id in channels[channel]) {
@@ -88,7 +88,7 @@ export class SignalingGateway implements OnModuleInit {
       }
       this.logger.info({
         message: '[' + socket.id + '] updateUserData',
-        payload: peers[channel][socket.id]
+        payload: peers[channel][socket.id],
       });
     });
 
@@ -106,7 +106,7 @@ export class SignalingGateway implements OnModuleInit {
       }
       this.logger.info({
         message: '[' + socket.id + '] part - connected peers grouped by channel',
-        payload: peers
+        payload: peers,
       });
 
       for (const id in channels[channel]) {
