@@ -9,5 +9,6 @@ RUN mkdir -p /opt/app &&\
 
 ADD ./ /opt/app
 USER app
-EXPOSE 3000
+EXPOSE 80
+EXPOSE 443
 CMD [ "npm", "start" ]
