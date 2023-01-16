@@ -10,6 +10,11 @@
 
 Приложение реализует интерфейс сигнального сервера для установки peer-to-peer соединения с помощью протокола WebRTC в браузере.
 
+## Основные файлы
+
+- [/client/www/script.js](./client/www/script.js) - клиентский код коммуникации с сигнальным сервером и установки WebRTC соединения
+- [/src/domain/webrtc/signaling/signaling.gateway.ts](./src/domain/webrtc/signaling/signaling.gateway.ts) - код сигнального сервера для обмена сессиями и ICE кандидатами
+
 ## Источник
 
 Алгоритм сигнального сервера и клиета взят из репозитория [tlk](https://github.com/vasanthv/tlk).
@@ -101,7 +106,7 @@ ClientA -> ClientA : Добавить ICE кандидата к подключе
 
 <br />
 
-<img src="diagrams/algorithm.svg" />
+<img src="docs/diagrams/algorithm.svg" />
 
 <br />
 
@@ -241,7 +246,7 @@ Websocket -- SignalingModule : Websocket
 
 <br />
 
-<img src="diagrams/class.svg" />
+<img src="docs/diagrams/class.svg" />
 
 ## Алгоритм установки соединения с помощью протокола WebRTC
 
