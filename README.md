@@ -22,7 +22,7 @@
 - [/docs/presentation/Запись_экрана_2023-01-16_в_18-01-49.mp4](./docs/presentation/Запись_экрана_2023-01-16_в_18-01-49.mp4) - запись работы приложения (запуск и создание звонка в браузере)
 
 <video width="640" height="480" controls muted>
-  <source src="docs/presentation/Запись_экрана_2023-01-16_в_18-01-49.mp4" type="video/mp4">
+  <source src="docs/presentation/2023-01-16_в_18-01-49.mp4" type="video/mp4">
 </video>
 
 ## Источник
