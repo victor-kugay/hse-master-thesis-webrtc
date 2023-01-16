@@ -12,8 +12,18 @@
 
 ## Основные файлы
 
+### Код
+
 - [/client/www/script.js](./client/www/script.js) - клиентский код коммуникации с сигнальным сервером и установки WebRTC соединения
 - [/src/domain/webrtc/signaling/signaling.gateway.ts](./src/domain/webrtc/signaling/signaling.gateway.ts) - код сигнального сервера для обмена сессиями и ICE кандидатами
+
+### Документация 
+
+- [/docs/presentation/Запись_экрана_2023-01-16_в_18-01-49.mp4](./docs/presentation/Запись_экрана_2023-01-16_в_18-01-49.mp4) - запись работы приложения (запуск и создание звонка в браузере)
+
+<video width="640" height="480" controls muted>
+  <source src="docs/presentation/Запись_экрана_2023-01-16_в_18-01-49.mp4" type="video/mp4">
+</video>
 
 ## Источник
 
@@ -106,7 +116,7 @@ ClientA -> ClientA : Добавить ICE кандидата к подключе
 
 <br />
 
-<img src="docs/diagrams/algorithm.svg" />
+<img width="640" height="480" src="docs/diagrams/algorithm.svg" />
 
 <br />
 
@@ -246,7 +256,7 @@ Websocket -- SignalingModule : Websocket
 
 <br />
 
-<img src="docs/diagrams/class.svg" />
+<img width="640" height="480" src="docs/diagrams/class.svg" />
 
 ## Алгоритм установки соединения с помощью протокола WebRTC
 
