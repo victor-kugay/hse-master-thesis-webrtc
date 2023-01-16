@@ -114,7 +114,7 @@ ClientA -> ClientA : Добавить ICE кандидата к подключе
 
 <br />
 
-<img width="640" height="480" src="docs/diagrams/algorithm.svg" />
+<img width="640" src="docs/diagrams/algorithm.svg" />
 
 <br />
 
@@ -254,7 +254,7 @@ Websocket -- SignalingModule : Websocket
 
 <br />
 
-<img width="640" height="480" src="docs/diagrams/class.svg" />
+<img width="640" src="docs/diagrams/class.svg" />
 
 ## Алгоритм установки соединения с помощью протокола WebRTC
 
