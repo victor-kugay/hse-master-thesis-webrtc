@@ -10,14 +10,15 @@
 
 Приложение реализует интерфейс сигнального сервера для установки peer-to-peer соединения с помощью протокола WebRTC в браузере.
 
-## Источник 
+## Источник
 
 Алгоритм сигнального сервера и клиета взят из репозитория [tlk](https://github.com/vasanthv/tlk).
 
 Проблемы источника:
-* Клиент использует vue.js и socket.io из глобальных переменных;
-* Сигнальный сервер использует глобальные переменные для группировки пиров по каналам;
-* Слабая типизация сигнального сервера и полное отсутствие типизации клиентаю
+
+- Клиент использует vue.js и socket.io из глобальных переменных;
+- Сигнальный сервер использует глобальные переменные для группировки пиров по каналам;
+- Слабая типизация сигнального сервера и полное отсутствие типизации клиентаю
 
 ## Установка
 
@@ -95,6 +96,7 @@ ClientA -> ClientA : Добавить ICE кандидата к подключе
 
 @enduml
 ```
+
 </details>
 
 <br />
@@ -123,28 +125,28 @@ package Client {
     +resizeVideos()
     +calcViewPortUnit()
   }
-  
+
   note right of App::handleJoinEvent
   * передает данные о пользователе;
   * устанавливает соединение.
   end note
-  
+
   note right of App::handleAddPeerEvent
   * получает список кандидатов для отправки офера.
   end note
-  
+
   note right of App::handleSessionDescriptionEvent
   * получает описание сессии для установки соединения.
   end note
-  
+
   note right of App::handleIceCandidateEvent
   * получает список ICE кандидатов для установки соединения.
   end note
-  
+
   note right of App::handleRemovePeerEvent
   * удаляет пользователя из звонка.
   end note
-  
+
   note right of App::attachMediaStream
   * добавляет медиа данные для отправки.
   end note
@@ -159,24 +161,24 @@ package Domain {
     +handleRelaySessionDescription()
     +handleDisconnectEvent()
   }
-  
+
   note left of SignalingModule::handleJoinEvent
   * cохраняет информацию о пользователе;
   * добавляет пользователя в канал для звонка.
   end note
-  
+
   note left of SignalingModule::handleUpdateUserDataEvent
   * обновить информацию о пользователе.
   end note
-  
+
   note left of SignalingModule::handleRelayICECandidate
   * обработать пару активных ICE кандидатов.
   end note
-  
+
   note left of SignalingModule::handleRelaySessionDescription
   * обработать описание сессии.
   end note
-  
+
   note left of SignalingModule::handleDisconnectEvent
   * удалить пользователя из звонка.
   end note
@@ -189,7 +191,7 @@ package Infrastructure {
     +warn()
     +debug()
   }
-  
+
   class WebsocketModule {
     +server
   }
@@ -207,19 +209,19 @@ package Infrastructure {
   Модуль отвечает за логирование HTTP
   запросов и WebSocket событий.
   end note
-  
+
   note bottom of ConfigModule
   Модуль сборщик
   конфигурации приложения.
   end note
-  
+
   note bottom of StaticModule
-  Модуль раздает статику для работы 
+  Модуль раздает статику для работы
   клиентской части приложения.
   end note
-  
+
   note left of WebsocketModule
-  Инкапсулирует логику работы 
+  Инкапсулирует логику работы
   с WebSocket в приложении.
   end note
 }
@@ -234,6 +236,7 @@ App -- Websocket : Websocket
 Websocket -- SignalingModule : Websocket
 @enduml
 ```
+
 </details>
 
 <br />
@@ -259,50 +262,42 @@ videoElement.srcObject = stream;
 3. Добавить обработчик RTCSessionDescription
 
 ```js
-signalingSocket.on("sessionDescription", function (config) {
-	const peer_id = config.peer_id;
+signalingSocket.on('sessionDescription', function (config) {
+  const peer_id = config.peer_id;
   // RTCPeerConnection других участников беседы
-	const peer = peers[peer_id];
-	const remoteDescription = config.session_description;
-	const description = new RTCSessionDescription(remoteDescription);
-	peer.setRemoteDescription(
-		description,
-		() => {
-			if (remoteDescription.type == "offer") {
-				peer.createAnswer(
-					(localDescription) => {
-						peer.setLocalDescription(
-							localDescription,
-							() => {
-                // уведомить остальных членов беседы о полученном описании сессиии
-								signalingSocket.emit("relaySessionDescription", {
-									peer_id: peer_id,
-									session_description: localDescription,
-								});
-							},
-						);
-					}
-				);
-			}
-		}
-	);
+  const peer = peers[peer_id];
+  const remoteDescription = config.session_description;
+  const description = new RTCSessionDescription(remoteDescription);
+  peer.setRemoteDescription(description, () => {
+    if (remoteDescription.type == 'offer') {
+      peer.createAnswer((localDescription) => {
+        peer.setLocalDescription(localDescription, () => {
+          // уведомить остальных членов беседы о полученном описании сессиии
+          signalingSocket.emit('relaySessionDescription', {
+            peer_id: peer_id,
+            session_description: localDescription,
+          });
+        });
+      });
+    }
+  });
 });
 ```
 
 4. Добавить обработчик RTCIceCandidate
 
 ```js
-signalingSocket.on("iceCandidate", function (config) {
-	const peer = peers[config.peer_id];
-	const iceCandidate = config.ice_candidate;
-	peer.addIceCandidate(new RTCIceCandidate(iceCandidate));
+signalingSocket.on('iceCandidate', function (config) {
+  const peer = peers[config.peer_id];
+  const iceCandidate = config.ice_candidate;
+  peer.addIceCandidate(new RTCIceCandidate(iceCandidate));
 });
 ```
 
 5. Запросить подключение к каналу у сигнального сервера
 
 ```js
-signalingSocket.emit("join", {channel, userData});
+signalingSocket.emit('join', {channel, userData});
 ```
 
 6. Добавить обработчик получения списка участников беседы
@@ -316,23 +311,23 @@ signalingSocket.on("addPeer", (config) => {
 7. В обработчике -> Создать экземпляр RTCPeerConnection подключения
 
 ```js
-const peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+const peerConnection = new RTCPeerConnection({iceServers: ICE_SERVERS});
 ```
 
 6. В обработчике -> Добавить обработчик получения ICE кандидатов
 
 ```js
 peerConnection.onicecandidate = function (event) {
-	if (event.candidate) {
+  if (event.candidate) {
     // информируем других членов беседы о новом ICE кандидате
-		signalingSocket.emit("relayICECandidate", {
-			peer_id: peer_id,
-			ice_candidate: {
-				sdpMLineIndex: event.candidate.sdpMLineIndex,
-				candidate: event.candidate.candidate,
-			},
-		});
-	}
+    signalingSocket.emit('relayICECandidate', {
+      peer_id: peer_id,
+      ice_candidate: {
+        sdpMLineIndex: event.candidate.sdpMLineIndex,
+        candidate: event.candidate.candidate,
+      },
+    });
+  }
 };
 ```
 
@@ -350,9 +345,9 @@ peerConnection.onaddstream = (event) => {
 
 ```js
 peerConnection.ondatachannel = function (event) {
-	event.channel.onmessage = (msg) => {
+  event.channel.onmessage = (msg) => {
     // обработать полученное сообщение
-	};
+  };
 };
 ```
 
@@ -362,22 +357,18 @@ peerConnection.ondatachannel = function (event) {
 peerConnection.addStream(localMediaStream);
 ```
 
-12.  Создать офер и запросить подключение к пользователям в канале
+12. Создать офер и запросить подключение к пользователям в канале
 
 ```js
 peerConnection.onnegotiationneeded = () => {
-	peerConnection
-		.createOffer()
-		.then((localDescription) => {
-			peerConnection
-				.setLocalDescription(localDescription)
-				.then(() => {
-          // Отправить описание сессию остальным членам беседы
-					signalingSocket.emit("relaySessionDescription", {
-						peer_id: peer_id,
-						session_description: localDescription,
-					});
-				});
-		});
+  peerConnection.createOffer().then((localDescription) => {
+    peerConnection.setLocalDescription(localDescription).then(() => {
+      // Отправить описание сессию остальным членам беседы
+      signalingSocket.emit('relaySessionDescription', {
+        peer_id: peer_id,
+        session_description: localDescription,
+      });
+    });
+  });
 };
 ```
